@@ -2,66 +2,102 @@
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
-    <title>MediaLink.ro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediaLink.ro | Intelligence Hub</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/21/21601.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,900&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #fff; }
+        body { font-family: 'Inter', sans-serif; background: #fff; color: #1a1a1a; }
         .serif-italic { font-family: 'Playfair Display', serif; font-style: italic; }
-        /* ✅ LIMITARE STRICTA 2 RANDURI TITLU */
         .line-clamp-2 {
             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
             overflow: hidden; height: 2.8rem; line-height: 1.4rem;
         }
         .active-cat { color: #FF2800 !important; border-bottom: 2px solid #FF2800; font-weight: 900; }
+        article img { transition: transform 0.5s ease; }
+        article:hover img { transform: scale(1.03); }
     </style>
 </head>
 <body class="antialiased border-t-[8px] border-[#FF2800]">
-    <header class="py-10 text-center">
-        <h1 class="serif-italic text-6xl font-black">MediaLink<span class="text-[#FF2800]">.</span>ro</h1>
-        <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mt-2 italic">Intelligence Hub • LIVE 48H</p>
+    <header class="py-12 text-center">
+        <h1 class="serif-italic text-6xl font-black tracking-tighter cursor-pointer" onclick="location.reload()">
+            MediaLink<span class="text-[#FF2800]">.</span>ro
+        </h1>
+        <div class="flex items-center justify-center gap-2 mt-3">
+            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400">Intelligence Hub • LIVE 24/7</p>
+        </div>
     </header>
-    <nav class="sticky top-0 bg-white border-y border-gray-100 z-50 py-4 flex justify-center gap-8 text-[11px] font-black uppercase tracking-widest text-gray-400">
+
+    <nav class="sticky top-0 bg-white/95 backdrop-blur border-y border-gray-100 z-50 py-4 flex justify-center gap-6 md:gap-10 text-[11px] font-black uppercase tracking-widest text-gray-400">
         <button onclick="filtru('Toate', this)" class="active-cat">Toate</button>
         <button onclick="filtru('Politica', this)">Politica</button>
         <button onclick="filtru('Economie', this)">Economie</button>
         <button onclick="filtru('Sport', this)">Sport</button>
     </nav>
+
     <main class="max-w-7xl mx-auto px-6 py-12">
-        <div id="news-grid" class="grid grid-cols-1 md:grid-cols-3 gap-10"></div>
+        <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 text-left">
+            </div>
     </main>
+
     <script>
         let rawData = [];
         async function init() {
-            const resp = await fetch('feed.xml?v=' + Date.now());
-            const xml = new DOMParser().parseFromString(await resp.text(), "text/xml");
-            rawData = Array.from(xml.querySelectorAll("item")).map(el => ({
-                t: el.querySelector("title")?.textContent,
-                u: el.querySelector("link")?.textContent,
-                d: el.querySelector("pubDate")?.textContent,
-                s: el.querySelector("source_name")?.textContent,
-                c: el.querySelector("category_name")?.textContent,
-                i: el.getElementsByTagNameNS("http://search.yahoo.com/mrss/", "content")[0]?.getAttribute("url")
-            }));
-            
-            // ✅ SORTARE: Cele mai noi sus
-            rawData.sort((a, b) => new Date(b.d) - new Date(a.d));
-            
-            render(rawData);
+            try {
+                const response = await fetch('feed.xml?v=' + Date.now());
+                const text = await response.text();
+                const xml = new DOMParser().parseFromString(text, "text/xml");
+                const items = xml.querySelectorAll("item");
+                
+                if (items.length === 0) {
+                    document.getElementById('news-grid').innerHTML = '<div class="col-span-full text-center py-20 text-gray-400 uppercase tracking-widest text-xs">Momentan nu sunt știri noi. Rulează bot.py</div>';
+                    return;
+                }
+
+                rawData = Array.from(items).map(el => {
+                    const media = el.getElementsByTagNameNS("http://search.yahoo.com/mrss/", "content")[0];
+                    return {
+                        t: el.querySelector("title")?.textContent || "Fără titlu",
+                        u: el.querySelector("link")?.textContent || "#",
+                        d: el.querySelector("pubDate")?.textContent || new Date().toISOString(),
+                        s: el.querySelector("source_name")?.textContent || "INFO",
+                        c: el.querySelector("category_name")?.textContent || "Actualitate",
+                        i: media ? media.getAttribute("url") : "https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800"
+                    };
+                });
+
+                rawData.sort((a, b) => new Date(b.d) - new Date(a.d));
+                render(rawData);
+            } catch (err) {
+                console.error(err);
+                document.getElementById('news-grid').innerHTML = '<div class="col-span-full text-center py-20 text-red-500 uppercase tracking-widest text-xs">Eroare la încărcarea datelor.</div>';
+            }
         }
+
         function render(data) {
-            document.getElementById('news-grid').innerHTML = data.map(item => 
+            const container = document.getElementById('news-grid');
+            container.innerHTML = data.map(item => 
                 <article class="cursor-pointer group" onclick="window.open('', '_blank')">
-                    <img src="" class="w-full aspect-video object-cover rounded-lg mb-4 shadow-sm">
-                    <div class="text-[10px] font-black text-[#FF2800] uppercase underline mb-1"></div>
-                    <h3 class="serif-italic text-lg font-bold line-clamp-2 group-hover:text-[#FF2800] tracking-tight"></h3>
+                    <div class="aspect-video overflow-hidden rounded-lg bg-gray-100 mb-4 shadow-sm">
+                        <img src="" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800'">
+                    </div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-[10px] font-black text-[#FF2800] uppercase underline"></span>
+                        <span class="text-[9px] text-gray-300">•</span>
+                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-tighter"></span>
+                    </div>
+                    <h3 class="serif-italic text-lg font-bold line-clamp-2 group-hover:text-[#FF2800] transition-colors leading-tight"></h3>
                 </article>).join('');
         }
+
         function filtru(cat, btn) {
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-cat'));
             btn.classList.add('active-cat');
             render(cat === 'Toate' ? rawData : rawData.filter(x => x.c === cat));
         }
+
         window.onload = init;
     </script>
 </body>
