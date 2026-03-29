@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediaLink.ro | Intelligence Hub</title>
+
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon32.png">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --ferrari-red: #FF2800; }
+        body { font-family: 'Inter', sans-serif; background: #fff; color: #1a1a1a; margin: 0; }
+        .serif { font-family: 'Playfair Display', serif; }
+        
+        .active-cat { color: var(--ferrari-red) !important; border-bottom: 2px solid var(--ferrari-red); font-weight: 900; }
+
+        .live-dot {
+            width: 8px; height: 8px; background-color: #22c55e; border-radius: 50%;
+            display: inline-block; position: relative;
+            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+            animation: pulse-green 2s infinite;
+        }
+        @keyframes pulse-green {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        #breaking-news-container {
+            background: var(--ferrari-red); display: none; color: white;
+            padding: 12px 20px; position: sticky; top: 0; z-index: 100;
+            cursor: pointer;
+        }
+
+        #gdpr-box {
+            position: fixed; bottom: 20px; left: 20px; right: 20px; 
+            max-width: 400px; background: #1a1a1a; color: white; 
+            padding: 20px; border-radius: 12px; z-index: 200; display: none;
+        }
+    </style>
+</head>
+<body class="antialiased border-t-[8px] border-[#FF2800]">
+
+    <div id="breaking-news-container">
+        <div class="max-w-7xl mx-auto flex items-center gap-4">
+            <span class="bg-white text-[#FF2800] text-[10px] font-black px-2 py-0.5 rounded italic">ALERTA</span>
+            <marquee id="breaking-content" class="font-bold text-sm uppercase"></marquee>
+        </div>
+    </div>
+
+    <header class="py-12 text-center">
+        <div class="serif text-6xl font-black tracking-tighter cursor-pointer" onclick="location.reload()">
+            MediaLink<span class="text-[#FF2800]">.</span>ro
+        </div>
+        <div class="flex items-center justify-center gap-2 mt-3">
+            <span class="live-dot"></span>
+            <p class="text-[11px] font-bold uppercase tracking-[0.4em] text-gray-400">Intelligence Hub</p>
+        </div>
+    </header>
+
+    <nav class="sticky top-0 bg-white/95 backdrop-blur border-y border-gray-100 z-50 overflow-x-auto">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-center gap-6 md:gap-10 text-[11px] font-black uppercase tracking-widest text-gray-400">
+            <button onclick="filtru('Toate', this)" class="active-cat">Toate</button>
+            <button onclick="filtru('Actualitate', this)">Actualitate</button>
+            <button onclick="filtru('Politica', this)">Politica</button>
+            <button onclick="filtru('Economie', this)">Economie</button>
+            <button onclick="filtru('Sport', this)">Sport</button>
+            <button onclick="filtru('Monden', this)">Monden</button>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-12">
+        <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 text-center">
+            <div class="col-span-full py-20 text-gray-300 italic uppercase text-[10px] tracking-widest">Sincronizare date live...</div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-50 border-t border-gray-100 py-16 px-6 mt-20">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div>
+                <div class="serif text-2xl font-black mb-4">MediaLink<span class="text-[#FF2800]">.</span>ro</div>
+                <p class="text-gray-500 text-xs leading-relaxed">Sursa ta premium pentru informații verificate și analize de intelligence, actualizată în timp real.</p>
+            </div>
+            <div>
+                <h4 class="text-[10px] font-black uppercase tracking-widest mb-6 text-gray-400">Contact & Suport</h4>
+                <a href="mailto:contact@medialink.ro" class="text-sm font-bold hover:text-[#FF2800] transition-colors underline decoration-2 decoration-[#FF2800]/20">contact@medialink.ro</a>
+            </div>
+            <div>
+                <h4 class="text-[10px] font-black uppercase tracking-widest mb-6 text-gray-400">Legal</h4>
+                <ul class="text-xs space-y-3 font-semibold">
+                    <li><a href="#" class="hover:text-[#FF2800]">Termeni și Condiții</a></li>
+                    <li><a href="#" class="hover:text-[#FF2800]">Politica de Confidențialitate</a></li>
+                    <li><a href="#" class="hover:text-[#FF2800]">Politica Cookies</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto mt-16 pt-8 border-t border-gray-200 text-[9px] font-bold text-gray-400 uppercase tracking-widest text-center">
+            © 2026 MediaLink.ro | Toate drepturile rezervate
+        </div>
+    </footer>
+
+    <div id="gdpr-box">
+        <p class="text-xs mb-4 text-gray-400 leading-relaxed">Acest site utilizează module cookie conform normelor GDPR 2026.</p>
+        <div class="flex gap-2">
+            <button onclick="setGDPR('da')" class="flex-1 bg-[#FF2800] py-2 text-[10px] font-bold rounded uppercase">Accept</button>
+            <button onclick="setGDPR('nu')" class="flex-1 bg-gray-800 py-2 text-[10px] font-bold rounded uppercase">Refuz</button>
+        </div>
+    </div>
+
+    <script>
+        const SB_URL = "https://hdzbcljqdkricyunaten.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkemJjbGpxZGtyaWN5dW5hdGVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2MDAxMDcsImV4cCI6MjA4OTE3NjEwN30.nS1eXCy10Q6r8hi9CAP-RUZfo9-YsNNjx5yNA9jvNzM";
+        const sb = supabase.createClient(SB_URL, SB_KEY);
+        let rawData = [];
+
+        async function init() {
+            // Preluăm știrile ordonate descrescător după data creării (cele mai noi primele)
+            const { data, error } = await sb.from('stiri')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(60);
+
+            if (error) {
+                console.error("Eroare Supabase:", error);
+                return;
+            }
+
+            if (data) {
+                rawData = data;
+                
+                // Căutăm cea mai recentă alertă activă
+                const alert = data.find(s => s.is_breaking === true); 
+                if(alert) {
+                    const alertBox = document.getElementById('breaking-news-container');
+                    alertBox.style.display = 'block';
+                    document.getElementById('breaking-content').innerText = alert.titlu;
+                    alertBox.onclick = () => window.open(alert.url_sursa, '_blank');
+                }
+                
+                // Randăm lista cronologic (fără amestecare)
+                renderStiri(data);
+            }
+        }
+
+        function renderStiri(lista) {
+            const container = document.getElementById('news-grid');
+            if (lista.length === 0) {
+                container.innerHTML = `<div class="col-span-full py-20 text-gray-400 uppercase text-[10px] tracking-widest">Nicio știre găsită în această categorie.</div>`;
+                return;
+            }
+
+            container.innerHTML = lista.map(s => `
+                <article class="cursor-pointer group text-left" onclick="window.open('${s.url_sursa}', '_blank')">
+                    <div class="aspect-video overflow-hidden rounded-lg bg-gray-100 mb-4 shadow-sm border border-gray-100">
+                        <img src="${s.imagine_url || 'https://via.placeholder.com/800x450?text=MediaLink'}" 
+                             alt="stire" 
+                             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                             onerror="this.src='https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800'">
+                    </div>
+                    <div class="flex items-center gap-2 mb-2 text-[9px] font-black uppercase tracking-widest text-gray-400">
+                        <span class="text-[#FF2800]">${s.sursa_nume || 'INFO'}</span>
+                        <span>•</span>
+                        <span>${new Date(s.created_at).toLocaleString('ro-RO', {hour: '2-digit', minute:'2-digit'})}</span>
+                    </div>
+                    <h3 class="text-base font-bold leading-tight group-hover:text-[#FF2800] transition-colors line-clamp-2">
+                        ${s.titlu}
+                    </h3>
+                    ${s.rezumat && s.rezumat !== 'NULL' ? `<p class="text-xs text-gray-500 mt-2 line-clamp-2">${s.rezumat}</p>` : ''}
+                </article>
+            `).join('');
+        }
+
+        const curata = (t) => t ? t.toString().toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
+
+        function filtru(cat, btn) {
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-cat'));
+            btn.classList.add('active-cat');
+            
+            if (cat === 'Toate') {
+                renderStiri(rawData);
+            } else {
+                const filtrat = rawData.filter(s => curata(s.categorie) === curata(cat));
+                renderStiri(filtrat);
+            }
+        }
+
+        function setGDPR(val) {
+            localStorage.setItem('gdpr_2026', val);
+            document.getElementById('gdpr-box').style.display = 'none';
+        }
+
+        window.onload = () => {
+            init();
+            if(!localStorage.getItem('gdpr_2026')) {
+                setTimeout(() => document.getElementById('gdpr-box').style.display = 'block', 1000);
+            }
+        };
+    </script>
+</body>
+</html>

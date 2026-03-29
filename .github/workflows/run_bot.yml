@@ -1,0 +1,32 @@
+name: Update News
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch: 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # Adăugăm o limită de 5 minute pentru tot job-ul
+    timeout-minutes: 5 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install feedparser supabase beautifulsoup4 requests
+
+      - name: Run Bot
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        # Dacă python bot.py nu termină în 3 minute, GitHub îl va opri
+        run: |
+          python bot.py
