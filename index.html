@@ -3,52 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediaLink.ro | Premium News</title>
-    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2540/2540832.png">
+    <title>MediaLink.ro | Intelligence Hub</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/10433/10433048.png">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,900&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Playfair+Display:ital,wght@1,900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #fff; margin: 0; color: #1a1a1a; }
+        body { font-family: 'Inter', sans-serif; background: #fff; color: #1a1a1a; margin: 0; }
         .serif-italic { font-family: 'Playfair Display', serif; font-style: italic; }
         
-        /* ✅ INCADRARE PREMIUM TITLU - MAX 2 RANDURI */
+        /* ✅ TITLU PREMIUM - 2 RANDURI MAXIM */
         .premium-title {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            height: 3rem; 
-            line-height: 1.5rem;
-            font-size: 1.125rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            overflow: hidden; height: 3.2rem; line-height: 1.6rem;
+            font-size: 1.1rem; font-weight: 700; letter-spacing: -0.01em; color: #111;
         }
 
-        .active-cat { color: #FF2800 !important; border-bottom: 3px solid #FF2800; font-weight: 900; }
-        #news-alert { background: #FF2800; color: white; padding: 12px 0; font-weight: 900; text-transform: uppercase; font-size: 11px; letter-spacing: 0.1em; }
-        
-        article img { transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-        article:hover img { transform: scale(1.05); }
+        /* ✅ PUNCT VERDE PULSATORIU */
+        .live-dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; display: inline-block; margin-right: 8px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+
+        .active-cat { color: #FF2800 !important; border-bottom: 2px solid #FF2800; font-weight: 800; }
+        #news-alert { background: #FF2800; color: white; padding: 10px 0; font-weight: 800; text-transform: uppercase; font-size: 11px; }
+        #gdpr-box { position: fixed; bottom: 20px; left: 20px; background: #000; color: #fff; padding: 20px; border-radius: 12px; z-index: 1000; font-size: 12px; max-width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: none; }
     </style>
 </head>
 <body class="antialiased border-t-[8px] border-[#FF2800]">
 
     <div id="news-alert">
-        <div class="max-w-7xl mx-auto px-6 flex items-center gap-6">
-            <span class="bg-white text-[#FF2800] px-2 py-0.5 rounded text-[10px] shrink-0">LATEST</span>
-            <marquee id="alert-text" scrollamount="5"></marquee>
+        <div class="max-w-7xl mx-auto px-6 flex items-center gap-4">
+            <span class="bg-white text-[#FF2800] px-2 py-0.5 rounded text-[9px] font-black">BREAKING</span>
+            <marquee id="alert-text" scrollamount="6"></marquee>
         </div>
     </div>
 
     <header class="py-16 text-center">
-        <h1 class="serif-italic text-7xl font-black tracking-tighter cursor-pointer" onclick="location.reload()">
-            MediaLink<span style="color:#FF2800">.</span>ro
-        </h1>
-        <p class="text-[10px] font-bold uppercase tracking-[0.4em] text-gray-400 mt-4">Intelligence Hub • Premium Feed</p>
+        <div class="flex items-center justify-center gap-2 mb-2">
+            <span class="live-dot"></span>
+            <span class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">Live Updates 24/7</span>
+        </div>
+        <h1 class="serif-italic text-7xl font-black tracking-tighter cursor-pointer" onclick="location.reload()">MediaLink<span style="color:#FF2800">.</span>ro</h1>
     </header>
 
-    <nav class="sticky top-0 bg-white/90 backdrop-blur-md border-y border-gray-100 z-50 py-5">
-        <div class="max-w-7xl mx-auto px-6 flex justify-center gap-10 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400">
+    <nav class="sticky top-0 bg-white/95 backdrop-blur-md border-y border-gray-100 z-50 py-4">
+        <div class="max-w-7xl mx-auto px-6 flex justify-center gap-8 text-[11px] font-extrabold uppercase tracking-widest text-gray-400">
             <button onclick="filtru('Toate', this)" class="active-cat">Toate</button>
             <button onclick="filtru('Actualitate', this)">Actualitate</button>
             <button onclick="filtru('Politica', this)">Politica</button>
@@ -59,18 +56,30 @@
     </nav>
 
     <main class="max-w-7xl mx-auto px-6 py-16">
-        <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-16">
-            </div>
+        <div id="news-grid" class="grid grid-cols-1 md:grid-cols-3 gap-x-10 gap-y-16"></div>
     </main>
+
+    <footer class="bg-gray-50 border-t border-gray-100 py-12 text-center text-[11px] text-gray-400 font-medium">
+        <div class="flex justify-center gap-6 mb-4 uppercase tracking-widest font-black">
+            <a href="#" class="hover:text-black">Termeni și Condiții</a>
+            <a href="#" class="hover:text-black">Politica Cookie</a>
+            <a href="#" class="hover:text-black">GDPR</a>
+        </div>
+        <p>Contact: <span class="text-black font-bold">contact@medialink.ro</span></p>
+        <p class="mt-4 opacity-50">© 2026 MediaLink. Toate drepturile rezervate.</p>
+    </footer>
+
+    <div id="gdpr-box">
+        <p class="mb-4 leading-relaxed">Protejăm datele tale. Continuarea navigării implică acceptarea politicilor noastre de tip Cookie și GDPR.</p>
+        <button onclick="acceptGDPR()" class="w-full bg-[#FF2800] py-2 rounded-lg font-black uppercase text-[10px]">Am înțeles</button>
+    </div>
 
     <script>
         let rawData = [];
         async function init() {
             try {
                 const resp = await fetch('feed.xml?v=' + Date.now());
-                if (!resp.ok) throw new Error('Feed lipsește');
                 const xml = new DOMParser().parseFromString(await resp.text(), "text/xml");
-                
                 rawData = Array.from(xml.querySelectorAll("item")).map(el => ({
                     t: el.querySelector("title")?.textContent || "",
                     u: el.querySelector("link")?.textContent || "#",
@@ -79,38 +88,28 @@
                     c: el.querySelector("category_name")?.textContent || "Actualitate",
                     i: el.getElementsByTagNameNS("http://search.yahoo.com/mrss/", "content")[0]?.getAttribute("url") || "https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800"
                 }));
-
                 rawData.sort((a, b) => new Date(b.d) - new Date(a.d));
                 if(rawData.length > 0) document.getElementById('alert-text').innerText = rawData[0].t;
                 render(rawData);
-            } catch (e) { 
-                document.getElementById('news-grid').innerHTML = '<p class="col-span-full text-center text-gray-400 uppercase text-xs tracking-widest">Sincronizare feed...</p>';
-            }
+            } catch (e) { console.error(e); }
         }
-
         function render(data) {
             document.getElementById('news-grid').innerHTML = data.map(item => `
-                <article class="group cursor-pointer" onclick="window.open('${item.u}', '_blank')">
-                    <div class="aspect-[16/10] overflow-hidden rounded-xl bg-gray-100 mb-6 shadow-sm ring-1 ring-gray-200/50">
-                        <img src="${item.i}" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800'">
+                <article class="cursor-pointer group" onclick="window.open('${item.u}', '_blank')">
+                    <div class="aspect-video overflow-hidden rounded-xl bg-gray-100 mb-5 shadow-sm">
+                        <img src="${item.i}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" onerror="this.src='https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800'">
                     </div>
-                    <div class="flex items-center gap-3 mb-3">
-                        <span class="text-[10px] font-black text-[#FF2800] uppercase tracking-wider underline decoration-2 underline-offset-4">${item.s}</span>
-                        <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
-                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">${new Date(item.d).toLocaleDateString('ro-RO')}</span>
-                    </div>
-                    <h3 class="serif-italic premium-title group-hover:text-[#FF2800] transition-colors duration-300">${item.t}</h3>
+                    <div class="text-[10px] font-black text-[#FF2800] uppercase mb-2 tracking-wider underline underline-offset-4">${item.s}</div>
+                    <h3 class="premium-title group-hover:text-gray-600 transition-colors">${item.t}</h3>
                 </article>`).join('');
         }
-
         function filtru(cat, btn) {
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-cat'));
             btn.classList.add('active-cat');
-            const clean = (t) => t.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            render(cat === 'Toate' ? rawData : rawData.filter(x => clean(x.c) === clean(cat)));
+            render(cat === 'Toate' ? rawData : rawData.filter(x => x.c === cat));
         }
-
-        window.onload = init;
+        function acceptGDPR() { localStorage.setItem('gdpr_v1', '1'); document.getElementById('gdpr-box').style.display = 'none'; }
+        window.onload = () => { init(); if(!localStorage.getItem('gdpr_v1')) document.getElementById('gdpr-box').style.display = 'block'; };
     </script>
 </body>
 </html>
