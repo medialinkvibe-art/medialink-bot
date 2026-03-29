@@ -2,147 +2,67 @@
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediaLink.ro | Intelligence Hub</title>
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon32.png">
+    <title>MediaLink.ro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,900&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --ferrari-red: #FF2800; }
-        body { font-family: 'Inter', sans-serif; background: #fff; color: #1a1a1a; margin: 0; }
-        .serif { font-family: 'Playfair Display', serif; }
-        .active-cat { color: var(--ferrari-red) !important; border-bottom: 2px solid var(--ferrari-red); font-weight: 900; }
-        .live-dot {
-            width: 8px; height: 8px; background-color: #22c55e; border-radius: 50%;
-            display: inline-block; position: relative;
-            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
-            animation: pulse-green 2s infinite;
-        }
-        @keyframes pulse-green {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
-        }
-        #breaking-news-container { background: var(--ferrari-red); display: none; color: white; padding: 12px 20px; position: sticky; top: 0; z-index: 100; cursor: pointer; }
-        #gdpr-box { position: fixed; bottom: 20px; left: 20px; right: 20px; max-width: 400px; background: #1a1a1a; color: white; padding: 20px; border-radius: 12px; z-index: 200; display: none; }
-        /* Stilul care forteaza 2 randuri indiferent de browser */
+        body { font-family: 'Inter', sans-serif; background: #fff; }
+        .serif-italic { font-family: 'Playfair Display', serif; font-style: italic; }
+        /* ✅ LIMITARE STRICTA 2 RANDURI TITLU */
         .line-clamp-2 {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            height: 2.8rem;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            overflow: hidden; height: 2.8rem; line-height: 1.4rem;
         }
+        .active-cat { color: #FF2800 !important; border-bottom: 2px solid #FF2800; font-weight: 900; }
     </style>
 </head>
 <body class="antialiased border-t-[8px] border-[#FF2800]">
-    <div id="breaking-news-container">
-        <div class="max-w-7xl mx-auto flex items-center gap-4">
-            <span class="bg-white text-[#FF2800] text-[10px] font-black px-2 py-0.5 rounded italic">ALERTA</span>
-            <marquee id="breaking-content" class="font-bold text-sm uppercase"></marquee>
-        </div>
-    </div>
-    <header class="py-12 text-center">
-        <div class="serif text-6xl font-black tracking-tighter cursor-pointer" onclick="location.reload()">MediaLink<span class="text-[#FF2800]">.</span>ro</div>
-        <div class="flex items-center justify-center gap-2 mt-3">
-            <span class="live-dot"></span>
-            <p class="text-[11px] font-bold uppercase tracking-[0.4em] text-gray-400">Intelligence Hub</p>
-        </div>
+    <header class="py-10 text-center">
+        <h1 class="serif-italic text-6xl font-black">MediaLink<span class="text-[#FF2800]">.</span>ro</h1>
+        <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mt-2 italic">Intelligence Hub • LIVE 48H</p>
     </header>
-    <nav class="sticky top-0 bg-white/95 backdrop-blur border-y border-gray-100 z-50 overflow-x-auto">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-center gap-6 md:gap-10 text-[11px] font-black uppercase tracking-widest text-gray-400">
-            <button onclick="filtru('Toate', this)" class="active-cat">Toate</button>
-            <button onclick="filtru('Actualitate', this)">Actualitate</button>
-            <button onclick="filtru('Politica', this)">Politica</button>
-            <button onclick="filtru('Economie', this)">Economie</button>
-            <button onclick="filtru('Sport', this)">Sport</button>
-            <button onclick="filtru('Monden', this)">Monden</button>
-        </div>
+    <nav class="sticky top-0 bg-white border-y border-gray-100 z-50 py-4 flex justify-center gap-8 text-[11px] font-black uppercase tracking-widest text-gray-400">
+        <button onclick="filtru('Toate', this)" class="active-cat">Toate</button>
+        <button onclick="filtru('Politica', this)">Politica</button>
+        <button onclick="filtru('Economie', this)">Economie</button>
+        <button onclick="filtru('Sport', this)">Sport</button>
     </nav>
     <main class="max-w-7xl mx-auto px-6 py-12">
-        <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 text-center">
-            <div class="col-span-full py-20 text-gray-300 italic uppercase text-[10px] tracking-widest">Sincronizare date live...</div>
-        </div>
+        <div id="news-grid" class="grid grid-cols-1 md:grid-cols-3 gap-10"></div>
     </main>
-    <footer class="bg-gray-50 border-t border-gray-100 py-16 px-6 mt-20">
-        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 text-left">
-            <div>
-                <div class="serif text-2xl font-black mb-4">MediaLink<span class="text-[#FF2800]">.</span>ro</div>
-                <p class="text-gray-500 text-xs leading-relaxed">Sursa ta premium pentru informații verificate și analize de intelligence, actualizată în timp real.</p>
-            </div>
-            <div>
-                <h4 class="text-[10px] font-black uppercase tracking-widest mb-6 text-gray-400">Contact & Suport</h4>
-                <a href="mailto:contact@medialink.ro" class="text-sm font-bold hover:text-[#FF2800] underline decoration-[#FF2800]/20 text-left">contact@medialink.ro</a>
-            </div>
-            <div>
-                <h4 class="text-[10px] font-black uppercase tracking-widest mb-6 text-gray-400">Legal</h4>
-                <ul class="text-xs space-y-3 font-semibold">
-                    <li><a href="#" class="hover:text-[#FF2800]">Termeni și Condiții</a></li>
-                    <li><a href="#" class="hover:text-[#FF2800]">Politica de Confidențialitate</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="max-w-7xl mx-auto mt-16 pt-8 border-t border-gray-200 text-[9px] font-bold text-gray-400 uppercase tracking-widest text-center">© 2026 MediaLink.ro | Toate drepturile rezervate</div>
-    </footer>
-    <div id="gdpr-box">
-        <p class="text-xs mb-4 text-gray-400 leading-relaxed">Acest site utilizează module cookie conform normelor GDPR 2026.</p>
-        <div class="flex gap-2">
-            <button onclick="setGDPR('da')" class="flex-1 bg-[#FF2800] py-2 text-[10px] font-bold rounded uppercase">Accept</button>
-            <button onclick="setGDPR('nu')" class="flex-1 bg-gray-800 py-2 text-[10px] font-bold rounded uppercase">Refuz</button>
-        </div>
-    </div>
     <script>
         let rawData = [];
         async function init() {
-            try {
-                const response = await fetch('feed.xml?v=' + new Date().getTime());
-                const xmlText = await response.text();
-                const dom = new window.DOMParser().parseFromString(xmlText, "text/xml");
-                const items = dom.querySelectorAll("item");
-                rawData = Array.from(items).map(el => ({
-                    titlu: el.querySelector("title")?.textContent || "",
-                    url_sursa: el.querySelector("link")?.textContent || "#",
-                    rezumat: el.querySelector("description")?.textContent || "",
-                    created_at: el.querySelector("pubDate")?.textContent || "",
-                    sursa_nume: el.querySelector("source_name")?.textContent || "INFO",
-                    categorie: el.querySelector("category_name")?.textContent || "Actualitate",
-                    imagine: el.querySelector("category_image")?.textContent || "https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800"
-                }));
-                if (rawData.length > 0) {
-                    document.getElementById('breaking-news-container').style.display = 'block';
-                    document.getElementById('breaking-content').innerText = rawData[0].titlu;
-                    renderStiri(rawData);
-                }
-            } catch (e) { console.error(e); }
+            const resp = await fetch('feed.xml?v=' + Date.now());
+            const xml = new DOMParser().parseFromString(await resp.text(), "text/xml");
+            rawData = Array.from(xml.querySelectorAll("item")).map(el => ({
+                t: el.querySelector("title")?.textContent,
+                u: el.querySelector("link")?.textContent,
+                d: el.querySelector("pubDate")?.textContent,
+                s: el.querySelector("source_name")?.textContent,
+                c: el.querySelector("category_name")?.textContent,
+                i: el.getElementsByTagNameNS("http://search.yahoo.com/mrss/", "content")[0]?.getAttribute("url")
+            }));
+            
+            // ✅ SORTARE: Cele mai noi sus
+            rawData.sort((a, b) => new Date(b.d) - new Date(a.d));
+            
+            render(rawData);
         }
-        function renderStiri(lista) {
-            const container = document.getElementById('news-grid');
-            container.innerHTML = lista.map(s => {
-                return '<article class="cursor-pointer group text-left" onclick="window.open(\'' + s.url_sursa + '\', \'_blank\')">' +
-                    '<div class="aspect-video overflow-hidden rounded-lg bg-gray-100 mb-4 shadow-sm border border-gray-100">' +
-                        '<img src="' + s.imagine + '" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">' +
-                    '</div>' +
-                    '<div class="flex items-center gap-2 mb-2 text-[9px] font-black uppercase tracking-widest text-gray-400">' +
-                        '<span class="text-[#FF2800] font-black underline">' + s.sursa_nume + '</span>' +
-                        '<span>•</span><span>' + s.created_at.substring(0, 16) + '</span>' +
-                    '</div>' +
-                    '<h3 class="text-base font-bold leading-tight group-hover:text-[#FF2800] transition-colors line-clamp-2 italic font-serif">' + s.titlu + '</h3>' +
-                    '<p class="text-xs text-gray-500 mt-2 line-clamp-2 leading-relaxed">' + s.rezumat + '</p>' +
-                '</article>';
-            }).join('');
+        function render(data) {
+            document.getElementById('news-grid').innerHTML = data.map(item => 
+                <article class="cursor-pointer group" onclick="window.open('', '_blank')">
+                    <img src="" class="w-full aspect-video object-cover rounded-lg mb-4 shadow-sm">
+                    <div class="text-[10px] font-black text-[#FF2800] uppercase underline mb-1"></div>
+                    <h3 class="serif-italic text-lg font-bold line-clamp-2 group-hover:text-[#FF2800] tracking-tight"></h3>
+                </article>).join('');
         }
         function filtru(cat, btn) {
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-cat'));
             btn.classList.add('active-cat');
-            const clean = (t) => t.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            renderStiri(cat === 'Toate' ? rawData : rawData.filter(s => clean(s.categorie) === clean(cat)));
+            render(cat === 'Toate' ? rawData : rawData.filter(x => x.c === cat));
         }
-        function setGDPR(v) { localStorage.setItem('gdpr_2026', v); document.getElementById('gdpr-box').style.display = 'none'; }
-        window.onload = () => {
-            init();
-            if(!localStorage.getItem('gdpr_2026')) setTimeout(() => document.getElementById('gdpr-box').style.display = 'block', 1000);
-        };
+        window.onload = init;
     </script>
 </body>
 </html>
