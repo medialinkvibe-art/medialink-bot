@@ -111,47 +111,34 @@
         </div>
     </div>
 
-    <script>
+        <script>
         let rawData = [];
-
         async function init() {
             try {
-                // Citim direct feed.xml în loc de Supabase
                 const response = await fetch('feed.xml?v=' + new Date().getTime());
                 const xmlText = await response.text();
                 const dom = new window.DOMParser().parseFromString(xmlText, "text/xml");
                 const items = dom.querySelectorAll("item");
-
                 rawData = Array.from(items).map(el => ({
                     titlu: el.querySelector("title")?.textContent || "",
                     url_sursa: el.querySelector("link")?.textContent || "#",
                     rezumat: el.querySelector("description")?.textContent || "",
-                    created_at: el.querySelector("pubDate")?.textContent || new Date().toISOString(),
-                    sursa_nume: "MEDIA", // Putem mapa sursa din link ulterior
-                    categorie: "Actualitate"
+                    created_at: el.querySelector("pubDate")?.textContent || "",
+                    sursa_nume: el.querySelector("source_name")?.textContent || "INFO",
+                    categorie: el.querySelector("category_name")?.textContent || "Actualitate",
+                    imagine: el.querySelector("category_image")?.textContent || "https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800"
                 }));
-
                 if (rawData.length > 0) {
-                    // Breaking news: Arătăm prima știre din feed
                     const alertBox = document.getElementById('breaking-news-container');
                     alertBox.style.display = 'block';
                     document.getElementById('breaking-content').innerText = rawData[0].titlu;
                     alertBox.onclick = () => window.open(rawData[0].url_sursa, '_blank');
-                    
                     renderStiri(rawData);
                 }
-            } catch (error) {
-                console.error("Eroare la incarcare feed.xml:", error);
-            }
+            } catch (error) { console.error("Eroare:", error); }
         }
-
-                function renderStiri(lista) {
+        function renderStiri(lista) {
             const container = document.getElementById('news-grid');
-            if (lista.length === 0) {
-                container.innerHTML = \<div class="col-span-full py-20 text-gray-400 uppercase text-[10px] tracking-widest">Nicio știre în această categorie.</div>\;
-                return;
-            }
-
             container.innerHTML = lista.map(s => \
                 <article class="cursor-pointer group text-left" onclick="window.open('\', '_blank')">
                     <div class="aspect-video overflow-hidden rounded-lg bg-gray-100 mb-4 shadow-sm border border-gray-100">
@@ -162,60 +149,23 @@
                         <span>•</span>
                         <span>\</span>
                     </div>
-                    <h3 class="text-base font-bold leading-tight group-hover:text-[#FF2800] transition-colors line-clamp-2 h-[2.5rem] overflow-hidden italic font-serif">
-                        \
-                    </h3>
-                    <p class="text-xs text-gray-500 mt-2 line-clamp-2 leading-relaxed opacity-80">\</p>
-                </article>
-            \).join('');
+                    <h3 class="text-base font-bold leading-tight group-hover:text-[#FF2800] transition-colors line-clamp-2 h-[2.5rem] overflow-hidden italic font-serif">\</h3>
+                    <p class="text-xs text-gray-500 mt-2 line-clamp-2">\</p>
+                </article>\).join('');
         }
-
-            container.innerHTML = lista.map(s => `
-                <article class="cursor-pointer group text-left" onclick="window.open('${s.url_sursa}', '_blank')">
-                    <div class="aspect-video overflow-hidden rounded-lg bg-gray-100 mb-4 shadow-sm border border-gray-100">
-                        <img src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800" 
-                             alt="stire" 
-                             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                    </div>
-                    <div class="flex items-center gap-2 mb-2 text-[9px] font-black uppercase tracking-widest text-gray-400">
-                        <span class="text-[#FF2800]">${s.sursa_nume}</span>
-                        <span>•</span>
-                        <span>${s.created_at.substring(0, 16)}</span>
-                    </div>
-                    <h3 class="text-base font-bold leading-tight group-hover:text-[#FF2800] transition-colors line-clamp-2 italic font-serif">
-                        ${s.titlu}
-                    </h3>
-                    ${s.rezumat ? `<p class="text-xs text-gray-500 mt-2 line-clamp-2">${s.rezumat}</p>` : ''}
-                </article>
-            `).join('');
-        }
-
-        const curata = (t) => t ? t.toString().toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
-
+        const curata = (t) => t ? t.toString().toLowerCase().trim().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "") : "";
         function filtru(cat, btn) {
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-cat'));
             btn.classList.add('active-cat');
-            
-            if (cat === 'Toate') {
-                renderStiri(rawData);
-            } else {
-                const filtrat = rawData.filter(s => curata(s.categorie) === curata(cat));
-                renderStiri(filtrat);
-            }
+            renderStiri(cat === 'Toate' ? rawData : rawData.filter(s => curata(s.categorie) === curata(cat)));
         }
-
-        function setGDPR(val) {
-            localStorage.setItem('gdpr_2026', val);
-            document.getElementById('gdpr-box').style.display = 'none';
-        }
-
+        function setGDPR(val) { localStorage.setItem('gdpr_2026', val); document.getElementById('gdpr-box').style.display = 'none'; }
         window.onload = () => {
             init();
-            if(!localStorage.getItem('gdpr_2026')) {
-                setTimeout(() => document.getElementById('gdpr-box').style.display = 'block', 1000);
-            }
+            if(!localStorage.getItem('gdpr_2026')) setTimeout(() => document.getElementById('gdpr-box').style.display = 'block', 1000);
         };
     </script>
 </body>
 </html>
+
 
