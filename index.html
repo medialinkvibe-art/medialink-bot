@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
@@ -145,12 +145,30 @@
             }
         }
 
-        function renderStiri(lista) {
+                function renderStiri(lista) {
             const container = document.getElementById('news-grid');
             if (lista.length === 0) {
-                container.innerHTML = `<div class="col-span-full py-20 text-gray-400 uppercase text-[10px] tracking-widest">Nicio știre găsită în această categorie.</div>`;
+                container.innerHTML = \<div class="col-span-full py-20 text-gray-400 uppercase text-[10px] tracking-widest">Nicio știre în această categorie.</div>\;
                 return;
             }
+
+            container.innerHTML = lista.map(s => \
+                <article class="cursor-pointer group text-left" onclick="window.open('\', '_blank')">
+                    <div class="aspect-video overflow-hidden rounded-lg bg-gray-100 mb-4 shadow-sm border border-gray-100">
+                        <img src="\" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                    </div>
+                    <div class="flex items-center gap-2 mb-2 text-[9px] font-black uppercase tracking-widest text-gray-400">
+                        <span class="text-[#FF2800] font-black underline">\</span>
+                        <span>•</span>
+                        <span>\</span>
+                    </div>
+                    <h3 class="text-base font-bold leading-tight group-hover:text-[#FF2800] transition-colors line-clamp-2 h-[2.5rem] overflow-hidden italic font-serif">
+                        \
+                    </h3>
+                    <p class="text-xs text-gray-500 mt-2 line-clamp-2 leading-relaxed opacity-80">\</p>
+                </article>
+            \).join('');
+        }
 
             container.innerHTML = lista.map(s => `
                 <article class="cursor-pointer group text-left" onclick="window.open('${s.url_sursa}', '_blank')">
@@ -200,3 +218,4 @@
     </script>
 </body>
 </html>
+
