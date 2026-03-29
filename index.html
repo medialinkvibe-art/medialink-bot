@@ -111,7 +111,7 @@
         </div>
     </div>
 
-        <script>
+            <script>
         let rawData = [];
         async function init() {
             try {
@@ -139,21 +139,22 @@
         }
         function renderStiri(lista) {
             const container = document.getElementById('news-grid');
-            container.innerHTML = lista.map(s => \
-                <article class="cursor-pointer group text-left" onclick="window.open('\', '_blank')">
-                    <div class="aspect-video overflow-hidden rounded-lg bg-gray-100 mb-4 shadow-sm border border-gray-100">
-                        <img src="\" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                    </div>
-                    <div class="flex items-center gap-2 mb-2 text-[9px] font-black uppercase tracking-widest text-gray-400">
-                        <span class="text-[#FF2800] font-black underline">\</span>
-                        <span>•</span>
-                        <span>\</span>
-                    </div>
-                    <h3 class="text-base font-bold leading-tight group-hover:text-[#FF2800] transition-colors line-clamp-2 h-[2.5rem] overflow-hidden italic font-serif">\</h3>
-                    <p class="text-xs text-gray-500 mt-2 line-clamp-2">\</p>
-                </article>\).join('');
+            container.innerHTML = lista.map(s => {
+                return '<article class="cursor-pointer group text-left" onclick="window.open(\'' + s.url_sursa + '\', \'_blank\')">' +
+                    '<div class="aspect-video overflow-hidden rounded-lg bg-gray-100 mb-4 shadow-sm border border-gray-100">' +
+                        '<img src="' + s.imagine + '" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">' +
+                    '</div>' +
+                    '<div class="flex items-center gap-2 mb-2 text-[9px] font-black uppercase tracking-widest text-gray-400">' +
+                        '<span class="text-[#FF2800] font-black underline">' + s.sursa_nume + '</span>' +
+                        '<span>•</span>' +
+                        '<span>' + s.created_at.substring(0, 16) + '</span>' +
+                    '</div>' +
+                    '<h3 class="text-base font-bold leading-tight group-hover:text-[#FF2800] transition-colors line-clamp-2 h-[2.5rem] overflow-hidden italic font-serif">' + s.titlu + '</h3>' +
+                    '<p class="text-xs text-gray-500 mt-2 line-clamp-2">' + s.rezumat + '</p>' +
+                '</article>';
+            }).join('');
         }
-        const curata = (t) => t ? t.toString().toLowerCase().trim().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "") : "";
+        const curata = (t) => t ? t.toString().toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
         function filtru(cat, btn) {
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-cat'));
             btn.classList.add('active-cat');
@@ -167,5 +168,6 @@
     </script>
 </body>
 </html>
+
 
 
