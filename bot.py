@@ -1,7 +1,13 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import feedparser
-import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
+from supabase import create_client
+import re
+
+# --- CONFIGURARE SUPABASE ---
+SUPABASE_URL = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkemJjbGpxZGtyaWN5dW5hdGVuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzYwMDEwNywiZXhwIjoyMDg5MTc2MTA3fQ.-vliiCuKPJopmwIaeHHMbc7ya76iccdEbAVCe6GFR_I"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkemJjbGpxZGtyaWN5dW5hdGVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2MDAxMDcsImV4cCI6MjA4OTE3NjEwN30.nS1eXCy10Q6r8hi9CAP-RUZfo9-YsNNjx5yNA9jvNzM"
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 RSS_SOURCES = {
     "Agerpres": "https://www.agerpres.ro/rss",
@@ -21,40 +27,59 @@ CAT_IMAGES = {
 
 def detect_category(t, s):
     txt = (t + " " + s).lower()
-    if any(w in txt for w in ["pib", "curs", "bursa", "euro", "profit", "economie"]): return "Economie"
-    if any(w in txt for w in ["guvern", "parlament", "psd", "pnl", "vot", "lege"]): return "Politica"
-    if any(w in txt for w in ["fotbal", "meci", "liga", "tenis", "gol", "echipa"]): return "Sport"
+    if any(w in txt for w in ["pib", "curs", "bursa", "euro", "profit", "economie", "bani"]): return "Economie"
+    if any(w in txt for w in ["guvern", "parlament", "psd", "pnl", "vot", "lege", "ministru"]): return "Politica"
+    if any(w in txt for w in ["fotbal", "meci", "liga", "tenis", "gol", "echipa", "sport"]): return "Sport"
+    if any(w in txt for w in ["vedete", "showbiz", "muzica", "actor", "monden"]): return "Monden"
     return "Actualitate"
 
-def generate_feed():
-    rss = ET.Element("rss", version="2.0")
-    rss.set("xmlns:media", "http://search.yahoo.com/mrss/")
-    ch = ET.SubElement(rss, "channel")
-    # Punem o limita mare (20 zile) doar ca sa verificam ca apar stirile
-    limita = datetime.now() - timedelta(hours=480)
-    seen = set()
-    count = 0
+def get_image(entry, category):
+    # Încearcă să găsească imaginea în tag-urile media sau în descriere
+    img_url = None
+    if 'media_content' in entry:
+        img_url = entry.media_content[0]['url']
+    elif 'links' in entry:
+        for link in entry.links:
+            if 'image' in link.get('type', ''):
+                img_url = link.get('href')
+    
+    # Dacă nu găsește nimic, caută un tag <img> în summary/content
+    if not img_url and 'summary' in entry:
+        found = re.search(r'<img [^>]*src="([^"]+)"', entry.summary)
+        if found: img_url = found.group(1)
+            
+    return img_url if img_url else CAT_IMAGES.get(category)
 
+def sync_news():
+    # Ștergere automată 48h
+    limita = (datetime.now() - timedelta(hours=48)).isoformat()
+    supabase.table("stiri").delete().lt("created_at", limita).execute()
+    
+    count = 0
     for name, url in RSS_SOURCES.items():
         try:
             f = feedparser.parse(url)
             for e in f.entries[:15]:
                 t = getattr(e, 'title', '').strip()
-                d = datetime(*(e.published_parsed[:6])) if hasattr(e, 'published_parsed') else datetime.now()
-                if t in seen or d < limita: continue
-                seen.add(t)
-                item = ET.SubElement(ch, "item")
-                ET.SubElement(item, "title").text = t
-                ET.SubElement(item, "link").text = getattr(e, 'link', '#')
-                ET.SubElement(item, "pubDate").text = d.isoformat()
-                ET.SubElement(item, "source_name").text = name
-                cat = detect_category(t, getattr(e, 'summary', ''))
-                ET.SubElement(item, "category_name").text = cat
-                m = ET.SubElement(item, "{http://search.yahoo.com/mrss/}content")
-                m.set("url", CAT_IMAGES[cat])
+                link = getattr(e, 'link', '#')
+                if not t or link == '#': continue
+                
+                sumar = getattr(e, 'summary', '')
+                cat = detect_category(t, sumar)
+                img = get_image(e, cat)
+                
+                data = {
+                    "titlu": t,
+                    "url_sursa": link,
+                    "sursa_nume": name,
+                    "imagine_url": img,
+                    "category_name": cat
+                }
+                
+                supabase.table("stiri").upsert(data, on_conflict="titlu").execute()
                 count += 1
         except: continue
-    ET.ElementTree(rss).write("feed.xml", encoding="utf-8", xml_declaration=True)
-    print(f"✅ Gata! {count} stiri in feed.xml")
+    print(f"✅ Flux actualizat: {count} stiri.")
 
-if __name__ == "__main__": generate_feed()
+if __name__ == "__main__":
+    sync_news()
