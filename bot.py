@@ -5,7 +5,8 @@ from supabase import create_client
 import re
 
 # --- CONFIGURARE SUPABASE ---
-SUPABASE_URL = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkemJjbGpxZGtyaWN5dW5hdGVuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzYwMDEwNywiZXhwIjoyMDg5MTc2MTA3fQ.-vliiCuKPJopmwIaeHHMbc7ya76iccdEbAVCe6GFR_I"
+# Verifică URL-ul! Trebuie să fie cel cu .supabase.co
+SUPABASE_URL = "https://hdzbcjljqdkricyunaten.supabase.co" 
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkemJjbGpxZGtyaWN5dW5hdGVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2MDAxMDcsImV4cCI6MjA4OTE3NjEwN30.nS1eXCy10Q6r8hi9CAP-RUZfo9-YsNNjx5yNA9jvNzM"
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -34,27 +35,21 @@ def detect_category(t, s):
     return "Actualitate"
 
 def get_image(entry, category):
-    # Încearcă să găsească imaginea în tag-urile media sau în descriere
     img_url = None
     if 'media_content' in entry:
         img_url = entry.media_content[0]['url']
-    elif 'links' in entry:
-        for link in entry.links:
-            if 'image' in link.get('type', ''):
-                img_url = link.get('href')
-    
-    # Dacă nu găsește nimic, caută un tag <img> în summary/content
-    if not img_url and 'summary' in entry:
+    elif 'summary' in entry:
         found = re.search(r'<img [^>]*src="([^"]+)"', entry.summary)
         if found: img_url = found.group(1)
-            
     return img_url if img_url else CAT_IMAGES.get(category)
 
 def sync_news():
-    # Ștergere automată 48h
+    # 1. Ștergem ce e mai vechi de 48h
     limita = (datetime.now() - timedelta(hours=48)).isoformat()
-    supabase.table("stiri").delete().lt("created_at", limita).execute()
-    
+    try:
+        supabase.table("stiri").delete().lt("created_at", limita).execute()
+    except: pass
+
     count = 0
     for name, url in RSS_SOURCES.items():
         try:
@@ -64,8 +59,7 @@ def sync_news():
                 link = getattr(e, 'link', '#')
                 if not t or link == '#': continue
                 
-                sumar = getattr(e, 'summary', '')
-                cat = detect_category(t, sumar)
+                cat = detect_category(t, getattr(e, 'summary', ''))
                 img = get_image(e, cat)
                 
                 data = {
@@ -75,11 +69,10 @@ def sync_news():
                     "imagine_url": img,
                     "category_name": cat
                 }
-                
                 supabase.table("stiri").upsert(data, on_conflict="titlu").execute()
                 count += 1
         except: continue
-    print(f"✅ Flux actualizat: {count} stiri.")
+    print(f"✅ Gata! {count} știri sincronizate.")
 
 if __name__ == "__main__":
     sync_news()
