@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
@@ -22,7 +22,6 @@
         .active-cat { color: #FF2800 !important; border-bottom: 2px solid #FF2800; font-weight: 900; }
         #news-alert { background: #FF2800; color: white; padding: 10px 0; font-weight: 900; text-transform: uppercase; font-size: 11px; }
         #gdpr-box { position: fixed; bottom: 20px; left: 20px; background: #000; color: #fff; padding: 20px; border-radius: 12px; z-index: 1000; font-size: 12px; max-width: 320px; display: none; }
-        a.contact-link:hover { color: #FF2800; }
     </style>
 </head>
 <body class="antialiased border-t-[8px] border-[#FF2800]">
@@ -30,7 +29,7 @@
     <div id="news-alert">
         <div class="max-w-7xl mx-auto px-6 flex items-center gap-4">
             <span class="bg-white text-[#FF2800] px-2 py-0.5 rounded text-[10px] font-black italic shadow-sm">NEWS ALERT</span>
-            <marquee id="alert-text" scrollamount="6"></marquee>
+            <marquee id="alert-text" scrollamount="6">Incarcare stiri de ultima ora...</marquee>
         </div>
     </div>
 
@@ -58,54 +57,52 @@
     </main>
 
     <footer class="bg-gray-50 border-t border-gray-100 py-16 text-center text-[11px] text-gray-400">
-        <div class="flex justify-center gap-8 mb-6 font-black uppercase tracking-widest">
-            <a href="#" class="hover:text-black">GDPR</a>
-            <a href="#" class="hover:text-black">Cookies</a>
-            <a href="#" class="hover:text-black">Termeni</a>
-        </div>
-        <p>Contact: <a href="mailto:contact@medialink.ro" class="contact-link font-bold text-black text-xs transition-colors">contact@medialink.ro</a></p>
+        <p>Contact: <a href="mailto:contact@medialink.ro" class="font-bold text-black text-xs">contact@medialink.ro</a></p>
     </footer>
-
-    <div id="gdpr-box">
-        <p class="mb-4">Acceptați utilizarea cookie-urilor pentru o experiență premium?</p>
-        <div class="flex gap-3">
-            <button onclick="gdpr(1)" class="w-full bg-[#FF2800] py-2 rounded font-black uppercase text-[10px]">Accept</button>
-            <button onclick="gdpr(0)" class="w-full bg-gray-700 py-2 rounded font-black uppercase text-[10px]">Refuz</button>
-        </div>
-    </div>
 
     <script>
         let rawData = [];
-        const FORTY_EIGHT_HOURS = 48 * 60 * 60 * 1000;
+        const SUPABASE_URL = "URL_TAU_AICI";
+        const SUPABASE_KEY = "ANON_KEY_TAU_AICI";
 
         async function init() {
             try {
-                const resp = await fetch('feed.xml?v=' + Date.now());
-                const xml = new DOMParser().parseFromString(await resp.text(), "text/xml");
-                const now = new Date().getTime();
+                // Cerem datele ordonate descrescator dupa timp
+                const resp = await fetch(`${SUPABASE_URL}/rest/v1/stiri?select=*&order=created_at.desc`, {
+                    headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
+                });
+                const data = await resp.json();
+                
+                rawData = data.map(item => ({
+                    t: item.titlu,
+                    u: item.url_sursa,
+                    d: item.created_at,
+                    s: item.sursa_nume,
+                    c: item.category_name,
+                    i: item.imagine_url
+                }));
 
-                rawData = Array.from(xml.querySelectorAll("item")).map(el => ({
-                    t: el.querySelector("title")?.textContent || "",
-                    u: el.querySelector("link")?.textContent || "#",
-                    d: new Date(el.querySelector("pubDate")?.textContent).getTime(),
-                    s: el.querySelector("source_name")?.textContent || "INFO",
-                    c: el.querySelector("category_name")?.textContent || "Actualitate",
-                    i: el.getElementsByTagNameNS("http://search.yahoo.com/mrss/", "content")[0]?.getAttribute("url") || ""
-                })).filter(item => (now - item.d) < FORTY_EIGHT_HOURS);
-
-                rawData.sort((a, b) => b.d - a.d);
                 if(rawData.length > 0) document.getElementById('alert-text').innerText = rawData[0].t;
                 render(rawData);
             } catch (e) { console.error(e); }
         }
 
         function render(data) {
-            document.getElementById('news-grid').innerHTML = data.map(item => `
+            const grid = document.getElementById('news-grid');
+            if(data.length === 0) {
+                grid.innerHTML = '<p class="col-span-3 text-center text-gray-400 py-20">Nicio stire gasita in aceasta categorie.</p>';
+                return;
+            }
+            grid.innerHTML = data.map(item => `
                 <article class="cursor-pointer group" onclick="window.open('${item.u}', '_blank')">
                     <div class="aspect-video overflow-hidden rounded-xl bg-gray-100 mb-5 shadow-sm">
-                        <img src="${item.i}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onerror="this.src='https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800'">
+                        <img src="${item.i}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                             onerror="this.src='https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800'">
                     </div>
-                    <div class="text-[10px] font-black text-[#FF2800] uppercase mb-2 underline underline-offset-4 decoration-2">${item.s}</div>
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="text-[10px] font-black text-[#FF2800] uppercase underline underline-offset-4 decoration-2">${item.s}</div>
+                        <div class="text-[9px] font-bold text-gray-300 uppercase">${item.c}</div>
+                    </div>
                     <h3 class="premium-title">${item.t}</h3>
                 </article>`).join('');
         }
@@ -113,11 +110,16 @@
         function filtru(cat, btn) {
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-cat'));
             btn.classList.add('active-cat');
-            render(cat === 'Toate' ? rawData : rawData.filter(x => x.c === cat));
+            
+            if (cat === 'Toate') {
+                render(rawData);
+            } else {
+                const filtered = rawData.filter(x => x.c === cat);
+                render(filtered);
+            }
         }
 
-        function gdpr(val) { localStorage.setItem('gdpr_choice', val); document.getElementById('gdpr-box').style.display = 'none'; }
-        window.onload = () => { init(); if(!localStorage.getItem('gdpr_choice')) document.getElementById('gdpr-box').style.display = 'block'; };
+        window.onload = init;
     </script>
 </body>
 </html>
